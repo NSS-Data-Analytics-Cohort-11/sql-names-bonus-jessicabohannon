@@ -1,8 +1,3 @@
-SELECT *
-FROM names
-ORDER BY name
-LIMIT 10
-
 /*1. How many rows are in the names table?*/
 
 SELECT COUNT(*)
@@ -124,4 +119,20 @@ LIMIT 1;
 
 /*12. How many distinct names appear that start with a 'Q', but whose second letter is not 'u'?*/
 
+SELECT COUNT(DISTINCT name) AS num_q_names_not_qu
+FROM names
+WHERE name ILIKE 'Q%'
+	AND name NOT ILIKE 'Qu%'
+	
+--Answer: 46
+
 /*13. Which is the more popular spelling between "Stephen" and "Steven"? Use a single query to answer this question.*/
+
+SELECT name,
+	SUM(num_registered) AS num_reg
+FROM names
+WHERE name IN ('Stephen', 'Steven')
+GROUP BY name
+ORDER BY num_reg DESC;
+
+--Answer: Steven is the more popular spelling
