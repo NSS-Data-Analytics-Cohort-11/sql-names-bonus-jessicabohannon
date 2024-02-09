@@ -64,7 +64,35 @@ GROUP BY gender;
 
 /*8. What are the most popular male and female names overall (i.e., the most total registrations)?*/
 
+WITH top_names AS (
+    SELECT name,
+		gender,
+        RANK() OVER (PARTITION BY gender ORDER BY SUM(num_registered) DESC) AS name_rank
+    FROM names
+    GROUP BY name, gender
+)
+SELECT name,
+	gender
+FROM top_names
+WHERE name_rank = 1;
+	
+--Answer: The most popular male and female names are James and Mary
+
 /*9. What are the most popular boy and girl names of the first decade of the 2000s (2000 - 2009)?*/
+
+WITH top_names_genz AS (
+    SELECT name,
+		gender,
+        RANK() OVER (PARTITION BY gender ORDER BY SUM(num_registered) DESC) AS name_rank
+    FROM (SELECT * FROM names WHERE year BETWEEN 2000 AND 2009)
+    GROUP BY name, gender
+)
+SELECT name,
+	gender
+FROM top_names_genz
+WHERE name_rank = 1;
+
+--Answer: The most popular male and female names 2000-2009 were Jacob and Emily
 
 /*10. Which year had the most variety in names (i.e. had the most distinct names)?*/
 
