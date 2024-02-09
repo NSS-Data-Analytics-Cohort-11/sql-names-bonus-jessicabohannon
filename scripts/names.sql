@@ -48,7 +48,19 @@ LIMIT 1;
 
 /*6. How many different (distinct) names are contained in the dataset?*/
 
+SELECT COUNT(DISTINCT name)
+FROM names;
+
+--Answer: 98,400
+
 /*7. Are there more males or more females registered?*/
+
+SELECT gender,
+	SUM(num_registered) AS num_registered
+FROM names
+GROUP BY gender;
+
+--Answer: There are more males registered
 
 /*8. What are the most popular male and female names overall (i.e., the most total registrations)?*/
 
