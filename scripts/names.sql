@@ -226,20 +226,44 @@ LIMIT 30;
 --What was the top boy and girl name each decade?
 
 WITH girl_names AS (
-	SELECT ROUND(year, -1) AS decade,
-		name,
-		SUM(num_registered) AS num_reg
-	FROM names
-	WHERE gender = 'F'
-	GROUP BY decade, name
+    SELECT 
+        ROUND(year, -1) AS decade,
+        name,
+        SUM(num_registered) AS num_reg,
+        RANK() OVER (PARTITION BY ROUND(year, -1) ORDER BY SUM(num_registered) DESC) AS name_rank
+    FROM names
+    WHERE gender = 'F'
+    GROUP BY decade, name
 ), 
 boy_names AS (
-	SELECT ROUND(year, -1) AS decade,
-		name,
-		SUM(num_registered) AS num_reg
-	FROM names
-	WHERE gender = 'M'
-	GROUP BY decade, name
-),
-SELECT
-	
+    SELECT 
+        ROUND(year, -1) AS decade,
+        name,
+        SUM(num_registered) AS num_reg,
+        RANK() OVER (PARTITION BY ROUND(year, -1) ORDER BY SUM(num_registered) DESC) AS name_rank
+    FROM names
+    WHERE gender = 'M'
+    GROUP BY decade, name
+)
+SELECT 
+    COALESCE(g.decade, b.decade) AS decade,
+    g.top_girl_name,
+    b.top_boy_name
+FROM (
+    SELECT 
+        decade,
+        name AS top_girl_name,
+        name_rank
+    FROM girl_names
+    WHERE name_rank = 1
+) AS g
+FULL JOIN (
+    SELECT 
+        decade,
+        name AS top_boy_name,
+        name_rank
+    FROM boy_names
+    WHERE name_rank = 1
+) AS b
+USING (decade)
+ORDER BY decade;

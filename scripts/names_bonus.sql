@@ -49,14 +49,49 @@ WHERE LOWER(name) ~* '([a-z])\1\1'
     AND LENGTH(name) >= 3;
 	
 --Answer: There are 22,537 double letter names and 12 triple letter names.
-	
-/*For the next few questions, you'll likely need to make use of subqueries. A subquery is a SQL query nested inside another query. You'll learn more about subqueries over the next few DataCamp assignments.*/
 
 /*5. On question 17 of the first part of the exercise, you found names that only appeared in the 1950s. Now, find all names that did not appear in the 1950s but were used both before and after the 1950s. We'll answer this question in two steps.
 		a. First, write a query that returns all names that appeared during the 1950s.
 		b. Now, make use of this query along with the IN keyword in order the find all names that did not appear in the 1950s but which were used both before and after the 1950s. See the example "A subquery with the IN operator." on this page: https://www.dofactory.com/sql/subquery.*/
+		
+SELECT DISTINCT name
+FROM names
+WHERE name NOT IN (
+	SELECT name
+	FROM names
+	WHERE year BETWEEN 1950 AND 1959
+	)
+	AND name IN (
+	SELECT name
+	FROM names
+	WHERE year < 1950
+	)
+	AND name IN (
+	SELECT name
+	FROM names
+	WHERE year > 1959
+	);
+	
+--Answer: There are 2525 names used both before and after, but not during, the 1950s, including Doritha, Murrey, and Ponda.
 	
 /*6. In question 16, you found how many names appeared in only one year. Which year had the highest number of names that only appeared once?*/
+
+WITH rare_names AS (
+	SELECT name, 
+		year
+	FROM names
+	GROUP BY name, 
+		year
+	HAVING COUNT(year) = 1
+)
+SELECT year,
+	COUNT(*)
+FROM rare_names
+GROUP BY year
+ORDER BY COUNT(*) DESC
+LIMIT 1;
+
+--2008 had the most, with 29,957
 
 /*7. Which year had the most new names (names that hadn't appeared in any years before that year)? For this question, you might find it useful to write a subquery and then select from this subquery. See this page about using subqueries in the from clause: https://www.geeksforgeeks.org/sql-sub-queries-clause/*/
 
