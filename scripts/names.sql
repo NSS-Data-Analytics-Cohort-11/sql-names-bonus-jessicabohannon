@@ -123,7 +123,7 @@ LIMIT 1;
 SELECT COUNT(DISTINCT name) AS num_q_names_not_qu
 FROM names
 WHERE name ILIKE 'Q%'
-	AND name NOT ILIKE 'Qu%'
+	AND name NOT ILIKE 'Qu%';
 	
 --Answer: 46
 
@@ -159,7 +159,7 @@ FROM boy_names
 )
 SELECT COUNT(DISTINCT name)	AS num_unisex_names,
 	ROUND((COUNT(DISTINCT name)::numeric / (SELECT COUNT(DISTINCT name) FROM names)::numeric) * 100.00, 2) AS perc_unisex_names
-FROM unisex_names
+FROM unisex_names;
 
 --Answer: 10.95% of names are unisex.
 
@@ -183,18 +183,31 @@ WITH rare_names AS (
 	HAVING COUNT(year) = 1
 )
 SELECT COUNT(name) AS num_rare_names
-FROM rare_names
+FROM rare_names;
 
 --Answer: 21,100
 
 /*17. How many names only appeared in the 1950s?*/
+
+SELECT COUNT(*) AS num_50s_names
+FROM (
+	SELECT name
+	FROM names AS n1
+	WHERE year BETWEEN 1950 AND 1959
+	EXCEPT
+	SELECT name
+	FROM names AS n2
+	WHERE year < 1950 OR year >= 1960
+) AS names_50s;
+
+--Answer: 661
 
 /*18. How many names made their first appearance in the 2010s?*/
 
 SELECT COUNT(name)
 FROM names
 GROUP BY name
-HAVING MIN(year) BETWEEN 2010 AND 2019
+HAVING MIN(year) BETWEEN 2010 AND 2019;
 
 --Answer: 11,270
 
@@ -210,3 +223,23 @@ LIMIT 30;
 --Answer: Roll and Zilpah have not been used since 1881.
 
 /*20. Come up with a question that you would like to answer using this dataset. Then write a query to answer this question.*/
+--What was the top boy and girl name each decade?
+
+WITH girl_names AS (
+	SELECT ROUND(year, -1) AS decade,
+		name,
+		SUM(num_registered) AS num_reg
+	FROM names
+	WHERE gender = 'F'
+	GROUP BY decade, name
+), 
+boy_names AS (
+	SELECT ROUND(year, -1) AS decade,
+		name,
+		SUM(num_registered) AS num_reg
+	FROM names
+	WHERE gender = 'M'
+	GROUP BY decade, name
+),
+SELECT
+	
