@@ -84,7 +84,11 @@ WITH top_names_genz AS (
     SELECT name,
 		gender,
         RANK() OVER (PARTITION BY gender ORDER BY SUM(num_registered) DESC) AS name_rank
-    FROM (SELECT * FROM names WHERE year BETWEEN 2000 AND 2009)
+    FROM (
+		SELECT * 
+		FROM names 
+		WHERE year BETWEEN 2000 AND 2009
+		)
     GROUP BY name, gender
 )
 SELECT name,
@@ -96,7 +100,27 @@ WHERE name_rank = 1;
 
 /*10. Which year had the most variety in names (i.e. had the most distinct names)?*/
 
+SELECT year,
+	COUNT(DISTINCT name) AS num_names
+FROM names
+GROUP BY year
+ORDER BY num_names DESC
+LIMIT 1;
+
+--Answer: 2008
+
 /*11. What is the most popular name for a girl that starts with the letter X?*/
+
+SELECT DISTINCT name AS x_name,
+	SUM(num_registered) AS num_reg
+FROM names
+WHERE name ILIKE 'X%'
+	AND gender = 'F'
+GROUP BY name
+ORDER BY num_reg DESC
+LIMIT 1;
+
+--Answer: Ximena
 
 /*12. How many distinct names appear that start with a 'Q', but whose second letter is not 'u'?*/
 
