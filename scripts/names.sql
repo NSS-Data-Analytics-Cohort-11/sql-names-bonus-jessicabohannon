@@ -86,6 +86,7 @@ WITH top_names_genz AS (
 		)
     GROUP BY name, gender
 )
+
 SELECT name,
 	gender
 FROM top_names_genz
@@ -136,3 +137,76 @@ GROUP BY name
 ORDER BY num_reg DESC;
 
 --Answer: Steven is the more popular spelling
+
+/*14. What percentage of names are "unisex" - that is what percentage of names have been used both for boys and for girls?*/
+
+WITH girl_names AS (
+	SELECT DISTINCT name
+	FROM names
+	WHERE gender = 'F'
+), 
+boy_names AS (
+	SELECT DISTINCT name
+	FROM names
+	WHERE gender = 'M'
+),
+unisex_names AS (
+SELECT name
+FROM girl_names
+INTERSECT
+SELECT name
+FROM boy_names
+)
+SELECT COUNT(DISTINCT name)	AS num_unisex_names,
+	ROUND((COUNT(DISTINCT name)::numeric / (SELECT COUNT(DISTINCT name) FROM names)::numeric) * 100.00, 2) AS perc_unisex_names
+FROM unisex_names
+
+--Answer: 10.95% of names are unisex.
+
+/*15. How many names have made an appearance in every single year since 1880?*/
+
+SELECT COUNT(DISTINCT name) AS num_popular_names
+FROM names
+WHERE name IN (SELECT name 
+			   FROM names
+			   GROUP BY name
+			   HAVING COUNT(DISTINCT year) = (SELECT MAX(year)-MIN(year) FROM names));
+
+--Answer: 120
+
+/*16. How many names have only appeared in one year?*/
+
+WITH rare_names AS (
+	SELECT name
+	FROM names
+	GROUP BY name
+	HAVING COUNT(year) = 1
+)
+SELECT COUNT(name) AS num_rare_names
+FROM rare_names
+
+--Answer: 21,100
+
+/*17. How many names only appeared in the 1950s?*/
+
+/*18. How many names made their first appearance in the 2010s?*/
+
+SELECT COUNT(name)
+FROM names
+GROUP BY name
+HAVING MIN(year) BETWEEN 2010 AND 2019
+
+--Answer: 11,270
+
+/*19. Find the names that have not be used in the longest.*/
+
+SELECT name AS old_name,
+	MAX(year) AS last_year
+FROM names
+GROUP BY name
+ORDER BY MAX(year)
+LIMIT 30;
+
+--Answer: Roll and Zilpah have not been used since 1881.
+
+/*20. Come up with a question that you would like to answer using this dataset. Then write a query to answer this question.*/

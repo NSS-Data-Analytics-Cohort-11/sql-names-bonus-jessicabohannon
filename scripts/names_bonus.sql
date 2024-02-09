@@ -23,10 +23,33 @@ WHERE LOWER(name) = REVERSE(LOWER(name));
 
 --There are 4091 palindrome names
 
-/*3. Find all names that contain no vowels (for this question, we'll count a,e,i,o,u, and y as vowels). (Hint: you might find this page helpful: https://www.postgresql.org/docs/8.3/functions-matching.html)*/
+/*3. Find all names that contain no vowels (for this question, we'll count a,e,i,o,u, and y as vowels).*/
+
+SELECT DISTINCT name AS no_vowel_name
+FROM names
+WHERE name NOT ILIKE '%a%'
+	AND name NOT ILIKE '%e%'
+	AND name NOT ILIKE '%i%'
+	AND name NOT ILIKE '%o%'
+	AND name NOT ILIKE '%u%'
+	AND name NOT ILIKE '%y%';
+	
+--Answer: There are 43 unique names without vowels; all consist of 2 consonants.
 
 /*4. How many double-letter names show up in the dataset? Double-letter means the same letter repeated back-to-back, like Matthew or Aaron. Are there any triple-letter names?*/
+	
+SELECT DISTINCT name AS double_letter_name
+FROM names
+WHERE LOWER(name) ~* '([a-z])\1'
+    AND LENGTH(name) >= 2;
 
+SELECT DISTINCT name AS triple_letter_name
+FROM names
+WHERE LOWER(name) ~* '([a-z])\1\1'
+    AND LENGTH(name) >= 3;
+	
+--Answer: There are 22,537 double letter names and 12 triple letter names.
+	
 /*For the next few questions, you'll likely need to make use of subqueries. A subquery is a SQL query nested inside another query. You'll learn more about subqueries over the next few DataCamp assignments.*/
 
 /*5. On question 17 of the first part of the exercise, you found names that only appeared in the 1950s. Now, find all names that did not appear in the 1950s but were used both before and after the 1950s. We'll answer this question in two steps.
