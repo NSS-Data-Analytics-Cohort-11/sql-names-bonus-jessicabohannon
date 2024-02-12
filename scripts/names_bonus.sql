@@ -93,9 +93,36 @@ LIMIT 1;
 
 --2008 had the most, with 29,957
 
-/*7. Which year had the most new names (names that hadn't appeared in any years before that year)? For this question, you might find it useful to write a subquery and then select from this subquery. See this page about using subqueries in the from clause: https://www.geeksforgeeks.org/sql-sub-queries-clause/*/
+/*7. Which year had the most new names (names that hadn't appeared in any years before that year)?*/
+
+SELECT first_year,
+	COUNT(name) AS num_new_names
+FROM (SELECT name,
+			MIN(year) AS first_year
+		FROM names
+		GROUP BY name) AS first_years
+GROUP BY first_year
+ORDER BY num_new_names DESC
+
+--ANSWER: 2007
 
 /*8. Is there more variety (more distinct names) for females or for males? Is this true for all years or are their any years where this is reversed? Hint: you may need to make use of multiple subqueries and JOIN them in order to answer this question.*/
+
+SELECT 
+    COUNT(DISTINCT CASE WHEN gender = 'M' THEN name END) AS num_male_names,
+    COUNT(DISTINCT CASE WHEN gender = 'F' THEN name END) AS num_female_names
+FROM names;
+
+--Answer: Female names have more variety.
+
+SELECT year,
+    COUNT(DISTINCT CASE WHEN gender = 'M' THEN name END) AS num_male_names,
+    COUNT(DISTINCT CASE WHEN gender = 'F' THEN name END) AS num_female_names
+FROM names
+GROUP BY year
+HAVING COUNT(DISTINCT CASE WHEN gender = 'M' THEN name END) > COUNT(DISTINCT CASE WHEN gender = 'F' THEN name END);
+
+--Answer: There was a greater variety of male names in 1880, 1881, and 1882.
 
 /*9. Which names are closest to being evenly split between male and female usage? For this question, consider only names that have been used at least 10000 times in total. */
 
