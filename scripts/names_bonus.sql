@@ -126,6 +126,29 @@ HAVING COUNT(DISTINCT CASE WHEN gender = 'M' THEN name END) > COUNT(DISTINCT CAS
 
 /*9. Which names are closest to being evenly split between male and female usage? For this question, consider only names that have been used at least 10000 times in total. */
 
+--I chose to find the most evenly split names based on percentages, but have included the counts as well
+
+SELECT 
+    name,
+	num_male,
+	num_female,
+    ROUND(num_male::numeric / (num_male+num_female) * 100.00, 2) AS perc_male,
+    ROUND(num_female::numeric / (num_male+num_female) * 100.00, 2) AS perc_female
+FROM (SELECT name,
+	SUM(CASE WHEN gender = 'M' THEN num_registered END) AS num_male,
+	SUM(CASE WHEN gender = 'F' THEN num_registered END) AS num_female
+FROM names 
+WHERE name <> 'Unknown'
+GROUP BY name
+HAVING 
+	SUM(CASE WHEN gender = 'M' THEN num_registered END) IS NOT NULL 
+	AND SUM(CASE WHEN gender = 'F' THEN num_registered END) IS NOT NULL
+	AND (SUM(CASE WHEN gender = 'M' THEN num_registered END)+SUM(CASE WHEN gender = 'F' THEN num_registered END))>10000
+) AS gender_split
+ORDER BY ABS((num_male::numeric / (num_male+num_female))-(num_female::numeric / (num_male+num_female))) 
+
+--Answer: The most evenly split names by gender are Elisha, Quinn, Santana, and Kerry
+
 /*For the last questions, you might find window functions useful (see https://www.postgresql.org/docs/9.1/sql-expressions.html#SYNTAX-WINDOW-FUNCTIONS and https://www.postgresql.org/docs/9.1/functions-window.html for a list of window function available in PostgreSQL). A window function is like an aggregate function in that it can be applied across a group, but a window function does not collapse each group down to a single summary statistic. The groupings for a window function are specified using the PARTITION BY keyword (and can include an ORDER BY when it is needed). The PARTITION BY and ORDER BY associated with a window function are CONTAINED in an OVER clause.
 For example, to rank each row by the value of num_registered, we can use the query
 ```
